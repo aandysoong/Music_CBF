@@ -4,6 +4,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics.pairwise import linear_kernel
 df1=pd.read_csv('filtered_data.csv')
 
+# Hello world
+
 def get_cosine_sim(v1,v2):
     pop1=np.array([v1])
     pop2=np.array([v2])
