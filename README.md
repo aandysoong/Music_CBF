@@ -13,7 +13,7 @@ Although the details may differ, it basically uses the idea that if a user likes
 
 (Image from: https://miro.medium.com/max/792/1*P63ZaFHlssabl34XbJgong.jpeg)
 
-Like the diagram above, CBF recommender systems use a user's past preferences and ratings to suggest other items of potential interest. In order to do this, however, a computer model will need enough data and training to know which items are similar and which are not. This is where a system for calculating similarity is put into place. Most programs use cosine similarity, which calculates the similarity of two vectors. In this model, I will be using cosine similarity as well as simple arithmetic calculations to find similar songs to a choice of music by the user. Keep in mind that this program is not meant for actual recommendations but is more of a test trial to set up the basis of a much better recommender system.
+Like the diagram above, CBF recommender systems use a user's past preferences and ratings to suggest other items of potential interest. In order to do this, however, a computer model will need enough data and training to know which items are similar and which are not. This is where a system for calculating similarity is put into place. Most programs use **cosine similarity**, which calculates the similarity of two vectors. But in this model, I will be using simple arithmetic calculations to find similar songs to a choice of music by the user. Keep in mind that this program is not meant for actual recommendations but is more of a test trial to demonstrate a recommender system and provide a good sense of CBF.
 
 ## Dataset
 The data for this model is from [this kaggle dataset](https://www.kaggle.com/yamaerenay/spotify-dataset-19212020-160k-tracks).
@@ -21,27 +21,25 @@ Specifically, I used the data_o.csv file for this model. It provides information
 
 This is a small representation of how it looks like on a spreadsheet (the actual data is too big to show here):
 
-| Title | Year | Popularity | Artists |
+| Name | Year | Popularity | Artists |
 |---|:---:|:---:|---|
 | Dynamite | 2020 | 97 | BTS |
 | Dakiti | 2020 | 100 | Bad Bunny, Jhay Cortez |
 | High Hopes | 2018 | 84 | Panic! At The Disco |
 
-However, I did not use all the data for this model but just the most popular 11000 songs (those with a popularity score of over 50). This reduced a lot of time and computing power while not affecting the results dramatically since unpopular songs will not be recommended often anyways.
+However, I did not use all the data for this model but just the most popular 11000 songs (those with a popularity score of over 50). This reduced a lot of time and computing power while not affecting the results dramatically since unpopular songs will not be recommended often anyways. I also reduced the number of columns down to just 'name', 'popularity', 'year', and 'artists' because I will not be needing the rest of the data for this specific recommender system.
 
 ## Actual Code
 
-### Part I: Similarity by Year Difference
+### 1. Similarity by Year Difference
 
-First of all, we need to import some python tools that are neccessary such as pandas, numpy, and sklearn. Pandas and numpy will help with calculations and organizing data while sklearn is essential for using cosine similarity. 
+First of all, we need to import some python tools that are neccessary such as pandas and numpy. They will help with calculations and organizing data. 
 ```python
 import pandas as pd
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.metrics.pairwise import linear_kernel
 ```
 
-Then, we import the music data (which is called 'filtered_data.csv') using pandas dataframe. We will be naming it df1. 
+Then, we import the music data (which is called 'filtered_data.csv' in my device) using pandas dataframe. We will be naming it df1. 
 ```python
 df1=pd.read_csv('filtered_data.csv')
 ```
@@ -163,7 +161,59 @@ you broke me first
 
 We get a list full of songs released in 2020. So the year similarity code is working.
 
-### Part II: Cosine Similarity
+### 2. Cosine Similarity
 
-We can apply the same type of logic/mechanism with the column "popularity" as well. This time, instead of using a simple subtraction method, we can use cosine similarity.
+Although I wanted to apply cosine similarity into this set of data for recommendations, the data was not really fit for cosine similarity. 
+However, using cosine similarity is not that hard to explain: Just use the same code as I did but plug in cosine similarity where we calculate the year difference!
+To explain further, cosine similarity is a measuring system which calculates the angle difference between two vectors, which becomes the similarity score. The actual equation for this is:
 
+![Cosine Similarity](https://neo4j.com/docs/graph-data-science/current/_images/cosine-similarity.png) 
+
+(Image from: https://neo4j.com/docs/graph-data-science/current/_images/cosine-similarity.png)
+
+However, we can eliminate this complicated process in our code since we can just import scikit learn, a python tool that helps with these kind of situations. 
+Then, we can import cosine simiarity, a tool within scikit learn.
+After that, in the same code that I just provided, just change the absolute value year difference code with cosine similarity.
+
+This is the code for this process (not included in the Music_Recommendation.py document):
+
+
+```python
+import sklearn.metrics.pairwise
+from sklearn.metrics.pairwise import cosine_similarity
+```
+Import the code
+
+
+
+```python
+def get_cosine_sim(v1,v2):
+    pop1=np.array([v1])
+    pop2=np.array([v2])
+    pop2=pop2.reshape(-1,1)
+    return sklearn.metrics.pairwise.cosine_similarity(pop1, pop2, dense_output=True)
+```
+Define cosine simialrity
+
+
+```python
+def cosine_sim_recom(name, get_cosine_sim=get_cosine_sim, get_second=get_second):
+    indices = pd.Series(df1.index, index=df1['name']).drop_duplicates() 
+    idx=indices.loc[name]
+    sim_scores=list(enumerate(get_cosine_sim(df1['popularity'], df1.loc[idx]['popularity'])))
+    sim_scores.sort(key=get_second)
+    sim_scores=sim_scores[-11:-1]
+    sim_scores = [i[0] for i in sim_scores]
+    for i in sim_scores:
+       print(df1.loc[i]['name'])
+```
+Plug in cosine similarity
+
+
+As I have stated before, the dataset was not really fit for cosine similarity, so I don't know if this will work. But hopefully it provides a good enough explanation as to what cosine similarity is and how to use it for recommender systems.
+
+
+
+
+
+Thank you for reading!
