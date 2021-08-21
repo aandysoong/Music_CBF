@@ -17,4 +17,5 @@ def recom_by_year(name, get_second=get_second):
     for i in sim_scores: # print out the songs
        print(df1.loc[i]['name'])
 
-recom_by_year('Dakiti')
+recom_by_year('Dakiti') 
+# change the song title to a song on the list that you want to find some recommendations for
